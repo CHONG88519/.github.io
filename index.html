@@ -528,8 +528,9 @@
         let ddCount = 0;
         let isAnimating = false;
         let stopSimulation = false;
-        let completedCount = 0; // 已完成的模拟次数
-        let targetCount = 0; // 目标模拟次数
+        let completedCount = 0;
+        let targetCount = 0;
+        let experimentStopped = false;
 
         const bucketA = document.getElementById('bucketA');
         const bucketB = document.getElementById('bucketB');
@@ -762,6 +763,10 @@
         async function startSimulation() {
             if (isAnimating) return;
 
+            if (experimentStopped) {
+                resetSimulation();
+            }
+
             const simCount = parseInt(document.getElementById('simCount').value);
             const blueA = parseInt(document.getElementById('blueA').value);
             const redA = parseInt(document.getElementById('redA').value);
@@ -813,6 +818,10 @@
         // 快速摇动功能：动画区域只显示1次摇动，但统计结果根据模拟次数生成
         async function startQuickShake() {
             if (isAnimating) return;
+
+            if (experimentStopped) {
+                resetSimulation();
+            }
 
             const simCount = parseInt(document.getElementById('simCount').value);
             const blueA = parseInt(document.getElementById('blueA').value);
@@ -1720,6 +1729,7 @@
         function resetSimulation() {
             isAnimating = false;
             stopSimulation = false;
+            experimentStopped = false;
             shakeBtn.disabled = false;
             stopBtn.disabled = true;
 
@@ -1747,6 +1757,11 @@
 
         function stopSimulationHandler() {
             stopSimulation = true;
+            experimentStopped = true;
+            isAnimating = false;
+            shakeBtn.disabled = false;
+            stopBtn.disabled = true;
+            quickShakeBtn.disabled = false;
         }
 
         function sleep(ms) {
