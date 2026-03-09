@@ -1,0 +1,1764 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>性状分离比的模拟实验 - 高中生物学数字化教学工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .main-content {
+            display: flex;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        .left-panel {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .control-panel {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .control-panel h3 {
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .input-group label {
+            font-size: 14px;
+            color: #495057;
+            font-weight: 500;
+        }
+
+        .input-group input {
+            padding: 8px;
+            border: 2px solid #ced4da;
+            border-radius: 5px;
+            font-size: 16px;
+            text-align: center;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+
+        /* 正确输入状态 */
+        .input-group input.valid {
+            border-color: #28a745;
+            background-color: #f8fff9;
+        }
+
+        .input-group input.valid:focus {
+            border-color: #28a745;
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.2);
+        }
+
+        /* 错误输入状态 */
+        .input-group input.invalid {
+            border-color: #dc3545;
+            background-color: #fff8f8;
+        }
+
+        .input-group input.invalid:focus {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.2);
+        }
+
+        /* 错误提示信息 */
+        .error-message {
+            font-size: 12px;
+            color: #dc3545;
+            min-height: 16px;
+            display: block;
+            margin-top: 2px;
+        }
+
+        .error-message:empty {
+            min-height: 16px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-shake {
+            background: #4CAF50;
+            color: white;
+            border: 2px solid #45a049;
+        }
+
+        .btn-shake:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn-quick-shake {
+            background: #FF9800;
+            color: white;
+        }
+
+        .btn-quick-shake:hover {
+            background: #F57C00;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4);
+        }
+
+        .btn-reset {
+            background: #2196F3;
+            color: white;
+        }
+
+        .btn-reset:hover {
+            background: #1976D2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.4);
+        }
+
+        .btn-stop {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-stop:hover {
+            background: #d32f2f;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(244, 67, 54, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .animation-area {
+            background: #f5f5f5;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            height: 450px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bucket {
+            position: absolute;
+            width: 180px;
+            height: 250px;
+            background-image: url('桶.png');
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .bucket-a {
+            left: 80px;
+            top: 90px;
+        }
+
+        .bucket-b {
+            left: 500px;
+            top: 90px;
+        }
+
+        .bucket-label {
+            position: absolute;
+            font-size: 16px;
+            font-weight: bold;
+            color: #000080;
+            z-index: 10;
+        }
+
+        .bucket-label-a {
+            left: 170px;
+            top: 50px;
+        }
+
+        .bucket-label-b {
+            left: 560px;
+            top: 50px;
+        }
+
+        .ball {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+            color: white;
+            transition: all 0.3s ease;
+            z-index: 5;
+        }
+
+        .ball-blue {
+            background: radial-gradient(circle at 30% 30%, #4169E1, #000080);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .ball-red {
+            background: radial-gradient(circle at 30% 30%, #DC143C, #8B0000);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .center-area {
+            position: absolute;
+            left: 300px;
+            top: 380px;
+            width: 200px;
+            height: 50px;
+            background: rgba(255, 255, 224, 0.8);
+            border: 2px dashed #DAA520;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .genotype-display {
+            font-size: 28px;
+            font-weight: bold;
+            color: #006400;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .genotype-display.show {
+            opacity: 1;
+        }
+
+        .right-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .stats-panel {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .stats-panel h3 {
+            color: #495057;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .stats-table th {
+            background: #3F51B5;
+            color: white;
+            padding: 8px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .stats-table td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .record-panel {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 15px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .record-panel h3 {
+            color: #495057;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .record-table-container {
+            flex: 1;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .record-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .record-table th {
+            background: #673AB7;
+            color: white;
+            padding: 8px;
+            text-align: center;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+        }
+
+        .record-table td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .record-table tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .shaking {
+            animation: shake 0.1s infinite;
+        }
+
+        @keyframes moveBall {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(var(--tx), var(--ty)); }
+        }
+
+        .moving {
+            animation: moveBall 0.5s ease-out forwards;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            性状分离比的模拟实验 - 高中生物学数字化教学工具
+        </div>
+
+        <div class="main-content">
+            <div class="left-panel">
+                <div class="control-panel">
+                    <h3>控制面板</h3>
+                    <div class="input-grid">
+                        <div class="input-group">
+                        <label for="blueA">甲桶蓝球(D):</label>
+                        <input type="number" id="blueA" value="10" min="10" max="30" step="1" placeholder="10-30">
+                        <span class="error-message" id="blueA-error"></span>
+                    </div>
+                    <div class="input-group">
+                        <label for="redA">甲桶红球(d):</label>
+                        <input type="number" id="redA" value="10" min="10" max="30" step="1" placeholder="10-30">
+                        <span class="error-message" id="redA-error"></span>
+                    </div>
+                    <div class="input-group">
+                        <label for="blueB">乙桶蓝球(D):</label>
+                        <input type="number" id="blueB" value="10" min="10" max="30" step="1" placeholder="10-30">
+                        <span class="error-message" id="blueB-error"></span>
+                    </div>
+                    <div class="input-group">
+                        <label for="redB">乙桶红球(d):</label>
+                        <input type="number" id="redB" value="10" min="10" max="30" step="1" placeholder="10-30">
+                        <span class="error-message" id="redB-error"></span>
+                    </div>
+                        <div class="input-group">
+                            <label for="simCount">模拟次数:</label>
+                            <input type="number" id="simCount" value="20" min="1" max="1000" step="1" placeholder="1-1000">
+                            <span class="error-message" id="simCount-error"></span>
+                        </div>
+                    </div>
+                    <div class="button-group">
+                        <button class="btn btn-shake" id="shakeBtn">摇 动</button>
+                        <button class="btn btn-stop" id="stopBtn" disabled>停止</button>
+                        <button class="btn btn-quick-shake" id="quickShakeBtn">快速摇动</button>
+                        <button class="btn btn-reset" id="resetBtn">重 置</button>
+                    </div>
+                </div>
+
+                <div class="animation-area" id="animationArea">
+                    <div class="bucket bucket-a" id="bucketA"></div>
+                    <div class="bucket bucket-b" id="bucketB"></div>
+                    <div class="bucket-label bucket-label-a">甲桶</div>
+                    <div class="bucket-label bucket-label-b">乙桶</div>
+                    <div class="center-area">
+                        <div class="genotype-display" id="genotypeDisplay"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <div class="stats-panel">
+                    <h3>统计结果</h3>
+                    <table class="stats-table">
+                        <thead>
+                            <tr>
+                                <th>基因型</th>
+                                <th>数量</th>
+                                <th>比例</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>DD</td>
+                                <td id="ddCount">0</td>
+                                <td id="ddRatio">0.00</td>
+                            </tr>
+                            <tr>
+                                <td>Dd</td>
+                                <td id="DdCount">0</td>
+                                <td id="DdRatio">0.00</td>
+                            </tr>
+                            <tr>
+                                <td>dd</td>
+                                <td id="dd2Count">0</td>
+                                <td id="dd2Ratio">0.00</td>
+                            </tr>
+                            <tr>
+                                <td>总计</td>
+                                <td id="totalCount">0</td>
+                                <td id="totalRatio"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="record-panel">
+                    <h3>实验记录表</h3>
+                    <div class="record-table-container">
+                        <table class="record-table">
+                            <thead>
+                                <tr>
+                                    <th>序号</th>
+                                    <th>基因型</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recordTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let ballsA = [];
+        let ballsB = [];
+        let results = [];
+        let DDCount = 0;
+        let DdCount = 0;
+        let ddCount = 0;
+        let isAnimating = false;
+        let stopSimulation = false;
+        let completedCount = 0; // 已完成的模拟次数
+        let targetCount = 0; // 目标模拟次数
+
+        const bucketA = document.getElementById('bucketA');
+        const bucketB = document.getElementById('bucketB');
+        const genotypeDisplay = document.getElementById('genotypeDisplay');
+        const shakeBtn = document.getElementById('shakeBtn');
+        const quickShakeBtn = document.getElementById('quickShakeBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const resetBtn = document.getElementById('resetBtn');
+
+        // 验证输入并显示错误提示
+        function validateInput(input, min, max) {
+            const errorElement = document.getElementById(input.id + '-error');
+            const value = input.value.trim();
+            
+            // 检查是否为空
+            if (value === '') {
+                input.classList.remove('valid', 'invalid');
+                if (errorElement) errorElement.textContent = '';
+                return false;
+            }
+            
+            // 检查是否为整数
+            const numValue = parseInt(value);
+            if (isNaN(numValue) || value.includes('.') || !/^-?\d+$/.test(value)) {
+                input.classList.remove('valid');
+                input.classList.add('invalid');
+                if (errorElement) errorElement.textContent = '请输入整数';
+                return false;
+            }
+            
+            // 检查是否在范围内
+            if (numValue < min || numValue > max) {
+                input.classList.remove('valid');
+                input.classList.add('invalid');
+                if (errorElement) errorElement.textContent = `请输入${min}-${max}之间的整数`;
+                return false;
+            }
+            
+            // 输入有效
+            input.classList.remove('invalid');
+            input.classList.add('valid');
+            if (errorElement) errorElement.textContent = '';
+            return true;
+        }
+
+        // 处理输入完成后的自动修正
+        function handleInputBlur(input, min, max) {
+            const value = input.value.trim();
+            const numValue = parseInt(value);
+            
+            if (value === '' || isNaN(numValue)) {
+                input.value = min;
+            } else if (numValue < min) {
+                input.value = min;
+            } else if (numValue > max) {
+                input.value = max;
+            } else {
+                input.value = numValue;
+            }
+            
+            // 清除验证状态
+            input.classList.remove('valid', 'invalid');
+            const errorElement = document.getElementById(input.id + '-error');
+            if (errorElement) errorElement.textContent = '';
+            
+            updateBalls();
+        }
+
+        // 为所有输入框添加事件监听器
+        const inputConfigs = [
+            { id: 'blueA', min: 10, max: 30 },
+            { id: 'redA', min: 10, max: 30 },
+            { id: 'blueB', min: 10, max: 30 },
+            { id: 'redB', min: 10, max: 30 },
+            { id: 'simCount', min: 1, max: 1000 }
+        ];
+
+        inputConfigs.forEach(config => {
+            const input = document.getElementById(config.id);
+            if (input) {
+                // 实时输入验证
+                input.addEventListener('input', function() {
+                    validateInput(this, config.min, config.max);
+                });
+                
+                // 失去焦点时自动修正
+                input.addEventListener('blur', function() {
+                    handleInputBlur(this, config.min, config.max);
+                });
+                
+                // 键盘事件处理
+                input.addEventListener('keydown', function(e) {
+                    // 阻止输入小数点和字母
+                    if (e.key === '.' || e.key === 'e' || e.key === 'E' || e.key === '-') {
+                        e.preventDefault();
+                    }
+                });
+            }
+        });
+
+        function createBall(isDominant, bucketIndex, ballIndex, x, y) {
+            const ball = document.createElement('div');
+            ball.className = isDominant ? 'ball ball-blue' : 'ball ball-red';
+            ball.textContent = isDominant ? 'D' : 'd';
+            ball.style.left = x + 'px';
+            ball.style.top = y + 'px';
+            ball.dataset.bucketIndex = bucketIndex;
+            ball.dataset.ballIndex = ballIndex;
+            ball.dataset.originalX = x;
+            ball.dataset.originalY = y;
+            return ball;
+        }
+
+        function clearAllBalls() {
+            ballsA.forEach(ball => ball.remove());
+            ballsB.forEach(ball => ball.remove());
+            ballsA = [];
+            ballsB = [];
+        }
+
+        function updateBalls() {
+            // Clear all existing balls
+            clearAllBalls();
+
+            const blueA = parseInt(document.getElementById('blueA').value) || 10;
+            const redA = parseInt(document.getElementById('redA').value) || 10;
+            const blueB = parseInt(document.getElementById('blueB').value) || 10;
+            const redB = parseInt(document.getElementById('redB').value) || 10;
+
+            // Generate 20 balls in left bucket (bucket A)
+            createBallsInBucket(blueA, redA, 0, 80, 90, 180, 250, bucketA, ballsA);
+            
+            // Generate 20 balls in right bucket (bucket B)
+            createBallsInBucket(blueB, redB, 1, 500, 90, 180, 250, bucketB, ballsB);
+            
+            console.log(`Bucket A has ${ballsA.length} balls`);
+            console.log(`Bucket B has ${ballsB.length} balls`);
+        }
+
+        function createBallsInBucket(blueCount, redCount, bucketIndex, bucketX, bucketY, bucketW, bucketH, container, ballsArray) {
+            const total = blueCount + redCount;
+            if (total === 0) return;
+
+            const radius = 12;
+            const paddingX = 20;
+            const paddingY = 25;
+            const maxHeight = bucketH * 0.67; // 桶总高度的三分之二
+            
+            const allBallsInfo = [];
+            for (let i = 0; i < blueCount; i++) allBallsInfo.push(true);
+            for (let i = 0; i < redCount; i++) allBallsInfo.push(false);
+            shuffleArray(allBallsInfo);
+
+            // 模拟重力堆积的初始排列
+            const ballPositions = [];
+            
+            allBallsInfo.forEach((isDominant, i) => {
+                let x, y;
+                let attempts = 0;
+                const maxAttempts = 100;
+                let validPosition = false;
+                
+                // 尝试找到合适的位置
+                while (!validPosition && attempts < maxAttempts) {
+                    // 下方区域分布密集，向上逐渐稀疏
+                    // 使用立方函数使小球更多分布在下方
+                    const heightFactor = Math.random();
+                    const normalizedHeight = Math.pow(heightFactor, 3);
+                    
+                    // 确保顶部边界至少为paddingY + 50（与shakeBalls函数中的边界检测一致）
+                    const minTopY = paddingY + 50;
+                    const availableHeight = bucketH - minTopY - radius * 2 - 10; // 10是底部边距
+                    y = bucketH - paddingY - radius * 2 - normalizedHeight * availableHeight;
+                    
+                    // 水平位置随机分布
+                    x = paddingX + 10 + Math.random() * (bucketW - paddingX * 2 - radius * 2 - 20); // 左右各留10个单位边距
+                    
+                    // 检查是否与已放置的球重叠
+                    validPosition = true;
+                    for (const pos of ballPositions) {
+                        const dx = pos.x - x;
+                        const dy = pos.y - y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        if (distance < radius * 1.6) { // 允许一定程度的重叠，增加密度
+                            validPosition = false;
+                            break;
+                        }
+                    }
+                    
+                    // 确保不超过高度限制
+                    if (y < minTopY) {
+                        validPosition = false;
+                    }
+                    
+                    // 确保不超过水平边界
+                    if (x < paddingX + 10 || x > bucketW - paddingX - radius * 2 - 10) {
+                        validPosition = false;
+                    }
+                    
+                    attempts++;
+                }
+                
+                // 如果找不到合适位置，使用默认位置
+                if (!validPosition) {
+                    // 确保默认位置也在下方区域且在边界内
+                    const defaultHeightFactor = Math.random();
+                    const defaultNormalizedHeight = Math.pow(defaultHeightFactor, 2);
+                    const minTopY = paddingY + 50;
+                    const availableHeight = bucketH - minTopY - radius * 2 - 10;
+                    y = bucketH - paddingY - radius * 2 - defaultNormalizedHeight * availableHeight;
+                    x = paddingX + 10 + Math.random() * (bucketW - paddingX * 2 - radius * 2 - 20);
+                }
+                
+                // 记录位置
+                ballPositions.push({ x, y });
+                
+                const ball = createBall(isDominant, bucketIndex, i, x, y);
+                container.appendChild(ball);
+                ballsArray.push(ball);
+            });
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        async function startSimulation() {
+            if (isAnimating) return;
+
+            const simCount = parseInt(document.getElementById('simCount').value);
+            const blueA = parseInt(document.getElementById('blueA').value);
+            const redA = parseInt(document.getElementById('redA').value);
+            const blueB = parseInt(document.getElementById('blueB').value);
+            const redB = parseInt(document.getElementById('redB').value);
+
+            if (blueA + redA === 0 || blueB + redB === 0) {
+                alert('每个桶中至少需要有一个小球！');
+                return;
+            }
+
+            // 如果是新的开始（completedCount为0或已完成），重置计数
+            if (completedCount === 0 || completedCount >= targetCount) {
+                targetCount = simCount;
+                completedCount = 0;
+            }
+
+            isAnimating = true;
+            stopSimulation = false;
+            shakeBtn.disabled = true;
+            stopBtn.disabled = false;
+
+            // 计算还需要完成的次数
+            const remainingCount = targetCount - completedCount;
+            const maxAnimationCount = Math.min(10, remainingCount);
+            let actualAnimationCount = 0;
+
+            for (let i = 0; i < maxAnimationCount && !stopSimulation; i++) {
+                const completed = await runAnimation();
+                if (completed) {
+                    completedCount++;
+                    actualAnimationCount++;
+                }
+            }
+
+            if (!stopSimulation) {
+                const remaining = remainingCount - actualAnimationCount;
+                if (remaining > 0) {
+                    quickSimulation(remaining, blueA, redA, blueB, redB);
+                    completedCount += remaining;
+                }
+            }
+
+            isAnimating = false;
+            shakeBtn.disabled = false;
+            stopBtn.disabled = true;
+        }
+
+        // 快速摇动功能：动画区域只显示1次摇动，但统计结果根据模拟次数生成
+        async function startQuickShake() {
+            if (isAnimating) return;
+
+            const simCount = parseInt(document.getElementById('simCount').value);
+            const blueA = parseInt(document.getElementById('blueA').value);
+            const redA = parseInt(document.getElementById('redA').value);
+            const blueB = parseInt(document.getElementById('blueB').value);
+            const redB = parseInt(document.getElementById('redB').value);
+
+            if (blueA + redA === 0 || blueB + redB === 0) {
+                alert('每个桶中至少需要有一个小球！');
+                return;
+            }
+
+            isAnimating = true;
+            stopSimulation = false;
+            shakeBtn.disabled = true;
+            quickShakeBtn.disabled = true;
+            stopBtn.disabled = false;
+
+            // 动画区域只显示1次摇动
+            await runQuickShakeAnimation(blueA, redA, blueB, redB);
+
+            // 动画完成后，根据模拟次数快速生成统计结果
+            if (!stopSimulation) {
+                generateQuickStats(simCount, blueA, redA, blueB, redB);
+            }
+
+            isAnimating = false;
+            shakeBtn.disabled = false;
+            quickShakeBtn.disabled = false;
+            stopBtn.disabled = true;
+        }
+
+        // 快速摇动动画：只执行动画，不更新统计
+        async function runQuickShakeAnimation(blueA, redA, blueB, redB) {
+            if (stopSimulation) return;
+            
+            // 执行摇动动画
+            await shakeBalls();
+            if (stopSimulation) return;
+            
+            // 短暂延迟以便观察
+            await sleep(200);
+        }
+
+        // 根据模拟次数快速生成统计结果
+        function generateQuickStats(count, blueA, redA, blueB, redB) {
+            const totalA = blueA + redA;
+            const totalB = blueB + redB;
+
+            for (let i = 0; i < count; i++) {
+                // 随机选择基因型
+                const randA = Math.random() * totalA;
+                const randB = Math.random() * totalB;
+                
+                const alleleA = randA < blueA ? 'D' : 'd';
+                const alleleB = randB < blueB ? 'D' : 'd';
+                
+                let genotype;
+                if (alleleA === 'D' && alleleB === 'D') {
+                    genotype = 'DD';
+                } else if (alleleA === 'd' && alleleB === 'd') {
+                    genotype = 'dd';
+                } else {
+                    genotype = 'Dd';
+                }
+
+                // 更新统计数据（不记录到实验记录表）
+                if (genotype === 'DD') {
+                    DDCount++;
+                } else if (genotype === 'Dd') {
+                    DdCount++;
+                } else if (genotype === 'dd') {
+                    ddCount++;
+                }
+            }
+
+            // 更新统计表格
+            updateStatsDisplay();
+        }
+
+        // 更新统计结果显示
+        function updateStatsDisplay() {
+            const total = DDCount + DdCount + ddCount;
+
+            document.getElementById('ddCount').textContent = DDCount;
+            document.getElementById('DdCount').textContent = DdCount;
+            document.getElementById('dd2Count').textContent = ddCount;
+            document.getElementById('totalCount').textContent = total;
+
+            // 更新比例
+            if (total > 0) {
+                // 前三行：转换为百分数格式，四舍五入到最接近的整数百分比（0-99%）
+                const ddPercent = Math.round((DDCount / total) * 100);
+                const DdPercent = Math.round((DdCount / total) * 100);
+                const dd2Percent = Math.round((ddCount / total) * 100);
+                
+                document.getElementById('ddRatio').textContent = ddPercent + '%';
+                document.getElementById('DdRatio').textContent = DdPercent + '%';
+                document.getElementById('dd2Ratio').textContent = dd2Percent + '%';
+                
+                // 第四行：数学约分处理，确保第一个数字为1
+                // 计算原始比例值
+                const ddRatioRaw = DDCount / total;
+                const DdRatioRaw = DdCount / total;
+                const dd2RatioRaw = ddCount / total;
+                
+                // 找到最大公约数
+                const findGCD = (a, b) => {
+                    return b === 0 ? a : findGCD(b, a % b);
+                };
+                
+                const gcd = findGCD(DDCount, findGCD(DdCount, ddCount));
+                
+                // 约分后的比例
+                let ddRatioApprox, DdRatioApprox, dd2RatioApprox;
+                if (gcd > 0) {
+                    ddRatioApprox = DDCount / gcd;
+                    DdRatioApprox = DdCount / gcd;
+                    dd2RatioApprox = ddCount / gcd;
+                } else {
+                    ddRatioApprox = ddRatioRaw;
+                    DdRatioApprox = DdRatioRaw;
+                    dd2RatioApprox = dd2RatioRaw;
+                }
+                
+                // 格式化第四行比例：以小数形式呈现，精确到小数点后一位
+                // 若约分结果为整数，则直接以整数形式呈现
+                const formatRatio = (value) => {
+                    if (Math.abs(value - Math.round(value)) < 0.001) {
+                        return Math.round(value).toString();
+                    } else {
+                        return value.toFixed(1);
+                    }
+                };
+                
+                // 确保第一个数字为1，其他数字相对于第一个数字计算
+                const normalizeRatio = (ratio, baseRatio) => {
+                    if (baseRatio > 0) {
+                        const normalized = ratio / baseRatio;
+                        return formatRatio(normalized);
+                    }
+                    return formatRatio(ratio);
+                };
+                
+                // 第一个数字始终为1，其他数字相对于第一个数字
+                const firstRatio = ddRatioApprox;
+                
+                // 检查是否有任何一个值为0，如果有则不输出结果
+                const a = 1; // 第一个数字始终为1
+                const b = parseFloat(normalizeRatio(DdRatioApprox, firstRatio));
+                const c = parseFloat(normalizeRatio(dd2RatioApprox, firstRatio));
+                
+                if (a === 0 || b === 0 || c === 0) {
+                    document.getElementById('totalRatio').textContent = '';
+                } else {
+                    document.getElementById('totalRatio').textContent = 
+                        `1:${normalizeRatio(DdRatioApprox, firstRatio)}:${normalizeRatio(dd2RatioApprox, firstRatio)}`;
+                }
+            }
+        }
+
+        async function runAnimation() {
+            if (stopSimulation) return false;
+            await shakeBalls();
+            if (stopSimulation) return false;
+            
+            const selectedBallA = ballsA[Math.floor(Math.random() * ballsA.length)];
+            const selectedBallB = ballsB[Math.floor(Math.random() * ballsB.length)];
+
+            if (stopSimulation) return false;
+            await moveBallsToCenter(selectedBallA, selectedBallB);
+            if (stopSimulation) return false;
+            
+            const genotype = determineGenotype(selectedBallA, selectedBallB);
+            displayGenotype(genotype);
+            recordResult(genotype);
+
+            if (stopSimulation) return true; // 即使停止，结果已经记录
+            await sleep(1000);
+            if (stopSimulation) return true; // 即使停止，结果已经记录
+            
+            await returnBalls(selectedBallA, selectedBallB);
+            if (stopSimulation) return true; // 即使停止，结果已经记录
+            
+            hideGenotype();
+            return true;
+        }
+
+        async function shakeBalls() {
+            const shakeCount = 40;
+            const bucketAWidth = 180;
+            const bucketAHeight = 250;
+            const bucketBWidth = 180;
+            const bucketBHeight = 250;
+            const ballRadius = 12;
+            const paddingX = 20;
+            const paddingY = 25;
+            const maxHeight = bucketAHeight * 0.67; // 桶总高度的三分之二
+            const gravity = 0.6; // 重力加速度，增加真实感
+            const friction = 0.93; // 摩擦系数，使运动更自然
+
+            // 为每个球添加速度和方向，初始速度更随机但更小
+            const ballVelocities = {
+                A: ballsA.map(() => ({ vx: (Math.random() - 0.5) * 8, vy: (Math.random() - 0.5) * 8 })),
+                B: ballsB.map(() => ({ vx: (Math.random() - 0.5) * 8, vy: (Math.random() - 0.5) * 8 }))
+            };
+
+            for (let i = 0; i < shakeCount; i++) {
+                if (stopSimulation) break;
+                
+                // 处理甲桶中的球
+                ballsA.forEach((ball, index) => {
+                    const velocity = ballVelocities.A[index];
+                    const currentX = parseFloat(ball.style.left);
+                    const currentY = parseFloat(ball.style.top);
+
+                    // 应用重力
+                    velocity.vy += gravity;
+                    
+                    // 应用摩擦
+                    velocity.vx *= friction;
+                    velocity.vy *= friction;
+
+                    // 计算新位置
+                    let newX = currentX + velocity.vx;
+                    let newY = currentY + velocity.vy;
+
+                    // 碰撞检测 - 桶壁，确保小球完全在桶内
+                    const minX = paddingX + 10; // 离左边界10个单位
+                    const maxX = bucketAWidth - paddingX - ballRadius * 2 - 10; // 离右边界10个单位
+                    const minY = paddingY + 50; // 离顶部边界50个单位
+                    const maxY = bucketAHeight - paddingY - ballRadius * 2 - 10; // 离底部10个单位
+                    
+                    if (newX < minX) {
+                        newX = minX;
+                        velocity.vx *= -0.7; // 减少反弹力度，更自然
+                    } else if (newX > maxX) {
+                        newX = maxX;
+                        velocity.vx *= -0.7;
+                    }
+
+                    if (newY < minY) {
+                        newY = minY;
+                        velocity.vy *= -0.7;
+                    } else if (newY > maxY) {
+                        newY = maxY;
+                        velocity.vy *= -0.7;
+                    }
+
+                    // 球与球之间的碰撞检测
+                    for (let j = 0; j < ballsA.length; j++) {
+                        if (j === index) continue;
+                        const otherBall = ballsA[j];
+                        const otherX = parseFloat(otherBall.style.left);
+                        const otherY = parseFloat(otherBall.style.top);
+                        
+                        const dx = newX - otherX;
+                        const dy = newY - otherY;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (distance < ballRadius * 2) {
+                            // 碰撞响应
+                            const angle = Math.atan2(dy, dx);
+                            const overlap = ballRadius * 2 - distance;
+                            
+                            // 分离小球
+                            newX += Math.cos(angle) * overlap * 0.5;
+                            newY += Math.sin(angle) * overlap * 0.5;
+                            
+                            // 更真实的碰撞速度计算
+                            const otherVelocity = ballVelocities.A[j];
+                            const nx = dx / distance;
+                            const ny = dy / distance;
+                            const p = 2 * (velocity.vx * nx + velocity.vy * ny - otherVelocity.vx * nx - otherVelocity.vy * ny) / 2;
+                            velocity.vx -= p * nx;
+                            velocity.vy -= p * ny;
+                            otherVelocity.vx += p * nx;
+                            otherVelocity.vy += p * ny;
+                        }
+                    }
+
+                    // 再次检查边界，确保碰撞后小球仍然在桶内
+                    if (newX < minX) {
+                        newX = minX;
+                        velocity.vx *= -0.7;
+                    } else if (newX > maxX) {
+                        newX = maxX;
+                        velocity.vx *= -0.7;
+                    }
+
+                    if (newY < minY) {
+                        newY = minY;
+                        velocity.vy *= -0.7;
+                    } else if (newY > maxY) {
+                        newY = maxY;
+                        velocity.vy *= -0.7;
+                    }
+
+                    // 更新位置
+                    ball.style.left = newX + 'px';
+                    ball.style.top = newY + 'px';
+
+                    // 随机调整速度（模拟摇晃效果）
+                    if (i < 15) { // 前15帧加强摇晃效果
+                        velocity.vx += (Math.random() - 0.5) * 2;
+                        velocity.vy += (Math.random() - 0.5) * 2;
+                    }
+
+                    // 限制速度
+                    const maxSpeed = 10;
+                    const speed = Math.sqrt(velocity.vx * velocity.vx + velocity.vy * velocity.vy);
+                    if (speed > maxSpeed) {
+                        velocity.vx = (velocity.vx / speed) * maxSpeed;
+                        velocity.vy = (velocity.vy / speed) * maxSpeed;
+                    }
+                });
+
+                // 处理乙桶中的球
+                ballsB.forEach((ball, index) => {
+                    const velocity = ballVelocities.B[index];
+                    const currentX = parseFloat(ball.style.left);
+                    const currentY = parseFloat(ball.style.top);
+
+                    // 应用重力
+                    velocity.vy += gravity;
+                    
+                    // 应用摩擦
+                    velocity.vx *= friction;
+                    velocity.vy *= friction;
+
+                    // 计算新位置
+                    let newX = currentX + velocity.vx;
+                    let newY = currentY + velocity.vy;
+
+                    // 碰撞检测 - 桶壁，确保小球完全在桶内
+                    const minX = paddingX + 10; // 离左边界10个单位
+                    const maxX = bucketBWidth - paddingX - ballRadius * 2 - 10; // 离右边界10个单位
+                    const minY = paddingY + 50; // 离顶部边界50个单位
+                    const maxY = bucketBHeight - paddingY - ballRadius * 2 - 10; // 离底部10个单位
+                    
+                    if (newX < minX) {
+                        newX = minX;
+                        velocity.vx *= -0.7;
+                    } else if (newX > maxX) {
+                        newX = maxX;
+                        velocity.vx *= -0.7;
+                    }
+
+                    if (newY < minY) {
+                        newY = minY;
+                        velocity.vy *= -0.7;
+                    } else if (newY > maxY) {
+                        newY = maxY;
+                        velocity.vy *= -0.7;
+                    }
+
+                    // 球与球之间的碰撞检测
+                    for (let j = 0; j < ballsB.length; j++) {
+                        if (j === index) continue;
+                        const otherBall = ballsB[j];
+                        const otherX = parseFloat(otherBall.style.left);
+                        const otherY = parseFloat(otherBall.style.top);
+                        
+                        const dx = newX - otherX;
+                        const dy = newY - otherY;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (distance < ballRadius * 2) {
+                            // 碰撞响应
+                            const angle = Math.atan2(dy, dx);
+                            const overlap = ballRadius * 2 - distance;
+                            
+                            // 分离小球
+                            newX += Math.cos(angle) * overlap * 0.5;
+                            newY += Math.sin(angle) * overlap * 0.5;
+                            
+                            // 更真实的碰撞速度计算
+                            const otherVelocity = ballVelocities.B[j];
+                            const nx = dx / distance;
+                            const ny = dy / distance;
+                            const p = 2 * (velocity.vx * nx + velocity.vy * ny - otherVelocity.vx * nx - otherVelocity.vy * ny) / 2;
+                            velocity.vx -= p * nx;
+                            velocity.vy -= p * ny;
+                            otherVelocity.vx += p * nx;
+                            otherVelocity.vy += p * ny;
+                        }
+                    }
+
+                    // 再次检查边界，确保碰撞后小球仍然在桶内
+                    if (newX < minX) {
+                        newX = minX;
+                        velocity.vx *= -0.7;
+                    } else if (newX > maxX) {
+                        newX = maxX;
+                        velocity.vx *= -0.7;
+                    }
+
+                    if (newY < minY) {
+                        newY = minY;
+                        velocity.vy *= -0.7;
+                    } else if (newY > maxY) {
+                        newY = maxY;
+                        velocity.vy *= -0.7;
+                    }
+
+                    // 更新位置
+                    ball.style.left = newX + 'px';
+                    ball.style.top = newY + 'px';
+
+                    // 随机调整速度（模拟摇晃效果）
+                    if (i < 15) { // 前15帧加强摇晃效果
+                        velocity.vx += (Math.random() - 0.5) * 2;
+                        velocity.vy += (Math.random() - 0.5) * 2;
+                    }
+
+                    // 限制速度
+                    const maxSpeed = 10;
+                    const speed = Math.sqrt(velocity.vx * velocity.vx + velocity.vy * velocity.vy);
+                    if (speed > maxSpeed) {
+                        velocity.vx = (velocity.vx / speed) * maxSpeed;
+                        velocity.vy = (velocity.vy / speed) * maxSpeed;
+                    }
+                });
+
+                await sleep(25); // 减少睡眠时间，使动画更流畅
+            }
+
+            if (!stopSimulation) {
+                // 让小球稳定下来，模拟自然堆积
+                for (let i = 0; i < 30; i++) {
+                    if (stopSimulation) break;
+                    
+                    // 处理甲桶中的球
+                    ballsA.forEach((ball, index) => {
+                        const velocity = ballVelocities.A[index];
+                        const currentX = parseFloat(ball.style.left);
+                        const currentY = parseFloat(ball.style.top);
+
+                        // 应用重力
+                        velocity.vy += gravity * 0.6;
+                        
+                        // 增加摩擦，使小球更快稳定
+                        velocity.vx *= 0.85;
+                        velocity.vy *= 0.85;
+
+                        // 计算新位置
+                        let newX = currentX + velocity.vx;
+                        let newY = currentY + velocity.vy;
+
+                        // 碰撞检测 - 桶壁
+                        const minX = paddingX + 10; // 离左边界10个单位
+                        const maxX = bucketAWidth - paddingX - ballRadius * 2 - 10; // 离右边界10个单位
+                        const minY = paddingY + 50; // 离顶部边界50个单位
+                        const maxY = bucketAHeight - paddingY - ballRadius * 2 - 10; // 离底部10个单位
+                        
+                        if (newX < minX) {
+                            newX = minX;
+                            velocity.vx *= -0.5;
+                        } else if (newX > maxX) {
+                            newX = maxX;
+                            velocity.vx *= -0.5;
+                        }
+
+                        if (newY < minY) {
+                            newY = minY;
+                            velocity.vy *= -0.5;
+                        } else if (newY > maxY) {
+                            newY = maxY;
+                            velocity.vy *= -0.5;
+                        }
+
+                        // 球与球之间的碰撞检测
+                        for (let j = 0; j < ballsA.length; j++) {
+                            if (j === index) continue;
+                            const otherBall = ballsA[j];
+                            const otherX = parseFloat(otherBall.style.left);
+                            const otherY = parseFloat(otherBall.style.top);
+                            
+                            const dx = newX - otherX;
+                            const dy = newY - otherY;
+                            const distance = Math.sqrt(dx * dx + dy * dy);
+                            
+                            if (distance < ballRadius * 2) {
+                                // 碰撞响应
+                                const angle = Math.atan2(dy, dx);
+                                const overlap = ballRadius * 2 - distance;
+                                
+                                // 分离小球
+                                newX += Math.cos(angle) * overlap * 0.5;
+                                newY += Math.sin(angle) * overlap * 0.5;
+                                
+                                // 轻微调整速度，使小球稳定
+                                const otherVelocity = ballVelocities.A[j];
+                                const nx = dx / distance;
+                                const ny = dy / distance;
+                                const p = 2 * (velocity.vx * nx + velocity.vy * ny - otherVelocity.vx * nx - otherVelocity.vy * ny) / 2;
+                                velocity.vx -= p * nx * 0.5;
+                                velocity.vy -= p * ny * 0.5;
+                                otherVelocity.vx += p * nx * 0.5;
+                                otherVelocity.vy += p * ny * 0.5;
+                            }
+                        }
+
+                        // 再次检查边界，确保碰撞后小球仍然在桶内
+                        if (newX < minX) {
+                            newX = minX;
+                            velocity.vx *= -0.5;
+                        } else if (newX > maxX) {
+                            newX = maxX;
+                            velocity.vx *= -0.5;
+                        }
+
+                        if (newY < minY) {
+                            newY = minY;
+                            velocity.vy *= -0.5;
+                        } else if (newY > maxY) {
+                            newY = maxY;
+                            velocity.vy *= -0.5;
+                        }
+
+                        // 更新位置
+                        ball.style.left = newX + 'px';
+                        ball.style.top = newY + 'px';
+                    });
+
+                    // 处理乙桶中的球
+                    ballsB.forEach((ball, index) => {
+                        const velocity = ballVelocities.B[index];
+                        const currentX = parseFloat(ball.style.left);
+                        const currentY = parseFloat(ball.style.top);
+
+                        // 应用重力
+                        velocity.vy += gravity * 0.6;
+                        
+                        // 增加摩擦，使小球更快稳定
+                        velocity.vx *= 0.85;
+                        velocity.vy *= 0.85;
+
+                        // 计算新位置
+                        let newX = currentX + velocity.vx;
+                        let newY = currentY + velocity.vy;
+
+                        // 碰撞检测 - 桶壁
+                        const minX = paddingX + 10; // 离左边界10个单位
+                        const maxX = bucketBWidth - paddingX - ballRadius * 2 - 10; // 离右边界10个单位
+                        const minY = paddingY + 50; // 离顶部边界50个单位
+                        const maxY = bucketBHeight - paddingY - ballRadius * 2 - 10; // 离底部10个单位
+                        
+                        if (newX < minX) {
+                            newX = minX;
+                            velocity.vx *= -0.5;
+                        } else if (newX > maxX) {
+                            newX = maxX;
+                            velocity.vx *= -0.5;
+                        }
+
+                        if (newY < minY) {
+                            newY = minY;
+                            velocity.vy *= -0.5;
+                        } else if (newY > maxY) {
+                            newY = maxY;
+                            velocity.vy *= -0.5;
+                        }
+
+                        // 球与球之间的碰撞检测
+                        for (let j = 0; j < ballsB.length; j++) {
+                            if (j === index) continue;
+                            const otherBall = ballsB[j];
+                            const otherX = parseFloat(otherBall.style.left);
+                            const otherY = parseFloat(otherBall.style.top);
+                            
+                            const dx = newX - otherX;
+                            const dy = newY - otherY;
+                            const distance = Math.sqrt(dx * dx + dy * dy);
+                            
+                            if (distance < ballRadius * 2) {
+                                // 碰撞响应
+                                const angle = Math.atan2(dy, dx);
+                                const overlap = ballRadius * 2 - distance;
+                                
+                                // 分离小球
+                                newX += Math.cos(angle) * overlap * 0.5;
+                                newY += Math.sin(angle) * overlap * 0.5;
+                                
+                                // 轻微调整速度，使小球稳定
+                                const otherVelocity = ballVelocities.B[j];
+                                const nx = dx / distance;
+                                const ny = dy / distance;
+                                const p = 2 * (velocity.vx * nx + velocity.vy * ny - otherVelocity.vx * nx - otherVelocity.vy * ny) / 2;
+                                velocity.vx -= p * nx * 0.5;
+                                velocity.vy -= p * ny * 0.5;
+                                otherVelocity.vx += p * nx * 0.5;
+                                otherVelocity.vy += p * ny * 0.5;
+                            }
+                        }
+
+                        // 再次检查边界，确保碰撞后小球仍然在桶内
+                        if (newX < minX) {
+                            newX = minX;
+                            velocity.vx *= -0.5;
+                        } else if (newX > maxX) {
+                            newX = maxX;
+                            velocity.vx *= -0.5;
+                        }
+
+                        if (newY < minY) {
+                            newY = minY;
+                            velocity.vy *= -0.5;
+                        } else if (newY > maxY) {
+                            newY = maxY;
+                            velocity.vy *= -0.5;
+                        }
+
+                        // 更新位置
+                        ball.style.left = newX + 'px';
+                        ball.style.top = newY + 'px';
+                    });
+
+                    await sleep(25);
+                }
+            }
+
+            // 检查小球是否接近桶边缘，如果是则回到中心位置
+            if (!stopSimulation) {
+                const bucketAWidth = 180;
+                const bucketAHeight = 250;
+                const bucketBWidth = 180;
+                const bucketBHeight = 250;
+                const ballRadius = 12;
+                const paddingX = 20;
+                const paddingY = 25;
+                const minX = paddingX + 10;
+                const maxX = bucketAWidth - paddingX - ballRadius * 2 - 10;
+                const minY = paddingY + 50;
+                const maxY = bucketAHeight - paddingY - ballRadius * 2 - 10;
+                const centerX = (minX + maxX) / 2;
+                const centerY = (minY + maxY) / 2;
+                const edgeThreshold = 5; // 5个单位的阈值
+
+                // 处理甲桶中的球
+                ballsA.forEach(ball => {
+                    const currentX = parseFloat(ball.style.left);
+                    const currentY = parseFloat(ball.style.top);
+
+                    // 检查是否接近边缘
+                    const nearLeftEdge = currentX - minX < edgeThreshold;
+                    const nearRightEdge = maxX - currentX < edgeThreshold;
+                    const nearTopEdge = currentY - minY < edgeThreshold;
+                    const nearBottomEdge = maxY - currentY < edgeThreshold;
+
+                    if (nearLeftEdge || nearRightEdge || nearTopEdge || nearBottomEdge) {
+                        // 回到中心位置
+                        ball.style.left = centerX + 'px';
+                        ball.style.top = centerY + 'px';
+                    }
+                });
+
+                // 处理乙桶中的球
+                ballsB.forEach(ball => {
+                    const currentX = parseFloat(ball.style.left);
+                    const currentY = parseFloat(ball.style.top);
+
+                    // 检查是否接近边缘
+                    const nearLeftEdge = currentX - minX < edgeThreshold;
+                    const nearRightEdge = maxX - currentX < edgeThreshold;
+                    const nearTopEdge = currentY - minY < edgeThreshold;
+                    const nearBottomEdge = maxY - currentY < edgeThreshold;
+
+                    if (nearLeftEdge || nearRightEdge || nearTopEdge || nearBottomEdge) {
+                        // 回到中心位置
+                        ball.style.left = centerX + 'px';
+                        ball.style.top = centerY + 'px';
+                    }
+                });
+            }
+        }
+
+        async function moveBallsToCenter(ballA, ballB) {
+            // Target positions relative to animation area
+            const targetXA = 360;
+            const targetYA = 350;
+            const targetXB = 410;
+            const targetYB = 350;
+
+            // Get current position relative to animation area
+            const animationArea = document.getElementById('animationArea');
+            const bucketA = document.getElementById('bucketA');
+            const bucketB = document.getElementById('bucketB');
+            
+            // Calculate current absolute position in animation area
+            const currentXA = parseFloat(ballA.style.left) + bucketA.offsetLeft;
+            const currentYA = parseFloat(ballA.style.top) + bucketA.offsetTop;
+            const currentXB = parseFloat(ballB.style.left) + bucketB.offsetLeft;
+            const currentYB = parseFloat(ballB.style.top) + bucketB.offsetTop;
+
+            // Move balls to animation area for animation
+            ballA.style.left = currentXA + 'px';
+            ballA.style.top = currentYA + 'px';
+            ballB.style.left = currentXB + 'px';
+            ballB.style.top = currentYB + 'px';
+            animationArea.appendChild(ballA);
+            animationArea.appendChild(ballB);
+
+            const steps = 20;
+            for (let i = 0; i <= steps; i++) {
+                const progress = i / steps;
+                ballA.style.left = (currentXA + (targetXA - currentXA) * progress) + 'px';
+                ballA.style.top = (currentYA + (targetYA - currentYA) * progress) + 'px';
+                ballB.style.left = (currentXB + (targetXB - currentXB) * progress) + 'px';
+                ballB.style.top = (currentYB + (targetYB - currentYB) * progress) + 'px';
+                await sleep(20);
+            }
+        }
+
+        async function returnBalls(ballA, ballB) {
+            const bucketA = document.getElementById('bucketA');
+            const bucketB = document.getElementById('bucketB');
+            const animationArea = document.getElementById('animationArea');
+            
+            // 获取小球在桶中的当前位置（摇动后的位置）
+            const currentBucketXA = parseFloat(ballA.style.left) - bucketA.offsetLeft;
+            const currentBucketYA = parseFloat(ballA.style.top) - bucketA.offsetTop;
+            const currentBucketXB = parseFloat(ballB.style.left) - bucketB.offsetLeft;
+            const currentBucketYB = parseFloat(ballB.style.top) - bucketB.offsetTop;
+            
+            // Target positions in animation area (current position in bucket + bucket offset)
+            const targetXA = currentBucketXA + bucketA.offsetLeft;
+            const targetYA = currentBucketYA + bucketA.offsetTop;
+            const targetXB = currentBucketXB + bucketB.offsetLeft;
+            const targetYB = currentBucketYB + bucketB.offsetTop;
+
+            const currentXA = parseFloat(ballA.style.left);
+            const currentYA = parseFloat(ballA.style.top);
+            const currentXB = parseFloat(ballB.style.left);
+            const currentYB = parseFloat(ballB.style.top);
+
+            const steps = 20;
+            for (let i = 0; i <= steps; i++) {
+                const progress = i / steps;
+                ballA.style.left = (currentXA + (targetXA - currentXA) * progress) + 'px';
+                ballA.style.top = (currentYA + (targetYA - currentYA) * progress) + 'px';
+                ballB.style.left = (currentXB + (targetXB - currentXB) * progress) + 'px';
+                ballB.style.top = (currentYB + (targetYB - currentYB) * progress) + 'px';
+                await sleep(20);
+            }
+            
+            // Return balls to their respective buckets with current position
+            ballA.style.left = currentBucketXA + 'px';
+            ballA.style.top = currentBucketYA + 'px';
+            ballB.style.left = currentBucketXB + 'px';
+            ballB.style.top = currentBucketYB + 'px';
+            bucketA.appendChild(ballA);
+            bucketB.appendChild(ballB);
+            
+            // 更新dataset中的位置，以便下次使用
+            ballA.dataset.originalX = currentBucketXA;
+            ballA.dataset.originalY = currentBucketYA;
+            ballB.dataset.originalX = currentBucketXB;
+            ballB.dataset.originalY = currentBucketYB;
+        }
+
+        function determineGenotype(ballA, ballB) {
+            const geneA = ballA.textContent === 'D' ? 'D' : 'd';
+            const geneB = ballB.textContent === 'D' ? 'D' : 'd';
+
+            if (geneA === 'D' && geneB === 'D') return 'DD';
+            if (geneA === 'd' && geneB === 'd') return 'dd';
+            return 'Dd';
+        }
+
+        function displayGenotype(genotype) {
+            genotypeDisplay.textContent = genotype;
+            genotypeDisplay.classList.add('show');
+        }
+
+        function hideGenotype() {
+            genotypeDisplay.classList.remove('show');
+        }
+
+        function recordResult(genotype) {
+            results.push(genotype);
+
+            if (genotype === 'DD') DDCount++;
+            else if (genotype === 'Dd') DdCount++;
+            else ddCount++;
+
+            const recordTableBody = document.getElementById('recordTableBody');
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${results.length}</td>
+                <td>${genotype}</td>
+            `;
+            recordTableBody.appendChild(row);
+
+            const container = document.querySelector('.record-table-container');
+            container.scrollTop = container.scrollHeight;
+
+            updateStatistics();
+        }
+
+        function updateStatistics() {
+            const total = DDCount + DdCount + ddCount;
+
+            document.getElementById('ddCount').textContent = DDCount;
+            document.getElementById('DdCount').textContent = DdCount;
+            document.getElementById('dd2Count').textContent = ddCount;
+            document.getElementById('totalCount').textContent = total;
+
+            if (total > 0) {
+                // 前三行：转换为百分数格式，四舍五入到最接近的整数百分比（0-99%）
+                const ddPercent = Math.round((DDCount / total) * 100);
+                const DdPercent = Math.round((DdCount / total) * 100);
+                const dd2Percent = Math.round((ddCount / total) * 100);
+                
+                document.getElementById('ddRatio').textContent = ddPercent + '%';
+                document.getElementById('DdRatio').textContent = DdPercent + '%';
+                document.getElementById('dd2Ratio').textContent = dd2Percent + '%';
+
+                // 第四行：数学约分处理，确保第一个数字为1
+                const findGCD = (a, b) => {
+                    return b === 0 ? a : findGCD(b, a % b);
+                };
+                
+                const gcdValue = findGCD(DDCount, findGCD(DdCount, ddCount));
+                
+                // 约分后的比例
+                let ddRatioApprox, DdRatioApprox, dd2RatioApprox;
+                if (gcdValue > 0) {
+                    ddRatioApprox = DDCount / gcdValue;
+                    DdRatioApprox = DdCount / gcdValue;
+                    dd2RatioApprox = ddCount / gcdValue;
+                } else {
+                    ddRatioApprox = DDCount / total;
+                    DdRatioApprox = DdCount / total;
+                    dd2RatioApprox = ddCount / total;
+                }
+                
+                // 格式化第四行比例：以小数形式呈现，精确到小数点后一位
+                // 若约分结果为整数，则直接以整数形式呈现
+                const formatRatio = (value) => {
+                    if (Math.abs(value - Math.round(value)) < 0.001) {
+                        return Math.round(value).toString();
+                    } else {
+                        return value.toFixed(1);
+                    }
+                };
+                
+                // 确保第一个数字为1，其他数字相对于第一个数字计算
+                const normalizeRatio = (ratio, baseRatio) => {
+                    if (baseRatio > 0) {
+                        const normalized = ratio / baseRatio;
+                        return formatRatio(normalized);
+                    }
+                    return formatRatio(ratio);
+                };
+                
+                // 第一个数字始终为1，其他数字相对于第一个数字
+                const firstRatio = ddRatioApprox;
+                
+                // 检查是否有任何一个值为0，如果有则不输出结果
+                const a = 1; // 第一个数字始终为1
+                const b = parseFloat(normalizeRatio(DdRatioApprox, firstRatio));
+                const c = parseFloat(normalizeRatio(dd2RatioApprox, firstRatio));
+                
+                if (a === 0 || b === 0 || c === 0) {
+                    document.getElementById('totalRatio').textContent = '';
+                } else {
+                    document.getElementById('totalRatio').textContent = 
+                        `1:${normalizeRatio(DdRatioApprox, firstRatio)}:${normalizeRatio(dd2RatioApprox, firstRatio)}`;
+                }
+            }
+        }
+
+        function gcd(a, b) {
+            while (b !== 0) {
+                [a, b] = [b, a % b];
+            }
+            return a;
+        }
+
+        function quickSimulation(count, blueA, redA, blueB, redB) {
+            const totalA = blueA + redA;
+            const totalB = blueB + redB;
+
+            const p_DA = blueA / totalA;
+            const p_da = redA / totalA;
+            const p_DB = blueB / totalB;
+            const p_db = redB / totalB;
+
+            const p_DD = p_DA * p_DB;
+            const p_Dd = p_DA * p_db + p_da * p_DB;
+            const p_dd = p_da * p_db;
+
+            for (let i = 0; i < count; i++) {
+                const rand = Math.random();
+                let genotype;
+                if (rand < p_DD) genotype = 'DD';
+                else if (rand < p_DD + p_Dd) genotype = 'Dd';
+                else genotype = 'dd';
+
+                recordResult(genotype);
+            }
+        }
+
+        function resetSimulation() {
+            isAnimating = false;
+            stopSimulation = false;
+            shakeBtn.disabled = false;
+            stopBtn.disabled = true;
+
+            results = [];
+            DDCount = 0;
+            DdCount = 0;
+            ddCount = 0;
+            completedCount = 0;
+            targetCount = 0;
+
+            document.getElementById('recordTableBody').innerHTML = '';
+
+            document.getElementById('ddCount').textContent = '0';
+            document.getElementById('DdCount').textContent = '0';
+            document.getElementById('dd2Count').textContent = '0';
+            document.getElementById('totalCount').textContent = '0';
+            document.getElementById('ddRatio').textContent = '0%';
+            document.getElementById('DdRatio').textContent = '0%';
+            document.getElementById('dd2Ratio').textContent = '0%';
+            document.getElementById('totalRatio').textContent = '';
+
+            hideGenotype();
+            updateBalls();
+        }
+
+        function stopSimulationHandler() {
+            stopSimulation = true;
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        shakeBtn.addEventListener('click', startSimulation);
+        quickShakeBtn.addEventListener('click', startQuickShake);
+        stopBtn.addEventListener('click', stopSimulationHandler);
+        resetBtn.addEventListener('click', resetSimulation);
+
+        updateBalls();
+    </script>
+</body>
+</html>
